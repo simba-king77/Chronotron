@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronotron: The Time Jumper - Master Time and Space</title>
+    <meta name="description" content="Chronotron is an innovative puzzle-platformer where you manipulate time, create echoes of your past self, and solve intricate challenges. Play now on zjtech.dpdns.org!">
+    <link rel="canonical" href="https://zjtech.dpdns.org/">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        // Apple-inspired palette
+                        'apple-dark': '#1C1C1E', // Dark background
+                        'apple-light-gray': '#E5E5EA', // Light text/elements
+                        'apple-blue': '#0A84FF', // Accent blue
+                        'apple-green': '#34C759', // Success green
+                        'apple-red': '#FF3B30', // Error/danger red
+                        'apple-gray': '#8E8E93', // Muted text
+                        'apple-card': '#2C2C2E', // Card background
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter for general text, Orbitron for game UI/titles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base styles from original game, adapted for Tailwind context */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Changed to column for header/footer */
+            justify-content: flex-start; /* Align items to start for scrollable content */
+            align-items: center;
+            min-height: 100vh; /* Use min-height for scrollable content */
+            background: #1a1a2e; /* Fallback for game container background */
+            background: linear-gradient(to bottom, #1a1a2e, #0f0c29); /* Dark gradient for body */
+            font-family: 'Inter', sans-serif;
+            color: #e0e0e0;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 960px;
+            aspect-ratio: 16 / 9;
+            box-shadow: 0 0 30px rgba(76, 209, 255, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+            background: #0f0c29; /* fallback */
+            background: -webkit-linear-gradient(to right, #24243e, #302b63, #0f0c29); /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+        }
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px #4cd1ff;
+        }
+        #level-display, #echo-count {
+            background: rgba(0,0,0,0.3);
+            padding: 5px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(76, 209, 255, 0.5);
+        }
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 12, 41, 0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+            pointer-events: all;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-content {
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(36, 36, 62, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(76, 209, 255, 0.7);
+            box-shadow: 0 0 20px rgba(76, 209, 255, 0.3);
+        }
+        .modal h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #4cd1ff;
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .modal p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        .modal button {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border: none;
+            background: #4cd1ff;
+            color: #1a1a2e;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px #4cd1ff;
+        }
+        .modal button:hover {
+            background: #fff;
+            box-shadow: 0 0 25px #fff;
+        }
+        .controls-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(76, 209, 255, 0.5);
+            font-size: 1rem;
+        }
+        #hint-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(76, 209, 255, 0.9);
+            color: #1a1a2e;
+            font-family: 'Orbitron', sans-serif;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #4cd1ff;
+            z-index: 101;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+            pointer-events: none;
+        }
+        #hint-box.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-apple-dark text-apple-light-gray font-sans">
+    <header class="w-full py-6 bg-apple-card shadow-lg mb-8 md:mb-12">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-apple-blue tracking-tight font-orbitron mb-2">
+                Chronotron: The Time Jumper
+            </h1>
+            <p class="text-lg md:text-xl text-apple-gray">
+                Dive into Chronotron, an innovative puzzle-platformer that challenges your perception of time and space.
+            </p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex flex-col items-center max-w-4xl">
+        <section class="mb-12 w-full">
+            <h2 class="text-3xl md:text-4xl font-bold text-apple-light-gray mb-6 text-center">
+                About the Game
+            </h2>
+            <p class="text-lg leading-relaxed text-apple-gray mb-4">
+                Chronotron is a unique puzzle-platformer where players wield the power to manipulate time. By pressing 'R', you can rewind your actions, leaving behind an "Echo" of your past self. These echoes will faithfully repeat your recorded movements, allowing you to cooperate with them to press distant buttons, collect unreachable keys, or create temporary platforms.
+            </p>
+            <p class="text-lg leading-relaxed text-apple-gray">
+                The goal is to strategically utilize these temporal duplicates to overcome obstacles, open doors, and ultimately reach the exit portal in each challenging level. With intuitive controls and increasingly complex puzzles, Chronotron offers a fresh take on the platforming genre, demanding both quick reflexes and clever planning.
+            </p>
+        </section>
+
+        <section class="mb-12 w-full">
+            <h2 class="text-3xl md:text-4xl font-bold text-apple-light-gray mb-6 text-center">
+                Play Chronotron
+            </h2>
+            <!-- Game Container from original Chronotron.html -->
+            <div class="game-container mx-auto">
+                <canvas id="gameCanvas"></canvas>
+                <div id="hint-box"></div>
+                <div class="ui-overlay">
+                    <div class="top-bar">
+                        <div id="level-display">Level 1</div>
+                        <div id="echo-count">Echoes: 0</div>
+                    </div>
+                    <div class="controls-info">
+                        <strong>Controls:</strong> ← → Move | ↑ Jump | R - Rewind | T - Reset | H - Hint
+                    </div>
+                </div>
+                <div id="start-modal" class="modal">
+                    <div class="modal-content">
+                        <h1>Chronotron</h1>
+                        <p>You have the power to manipulate time. Press 'R' to rewind to the start, leaving an "Echo" of your past self to repeat your actions. Cooperate with your echoes to solve puzzles and reach the portal!</p>
+                        <button id="start-button">Start Game</button>
+                    </div>
+                </div>
+                <div id="level-complete-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <h1 id="level-complete-title">Level Complete!</h1>
+                        <p id="level-complete-text">Well done! You masterfully bent the rules of time. Ready for the next challenge?</p>
+                        <button id="next-level-button">Next Level</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 w-full">
+            <h2 class="text-3xl md:text-4xl font-bold text-apple-light-gray mb-6 text-center">
+                Game Features
+            </h2>
+            <ul class="list-disc list-inside text-lg text-apple-gray space-y-2">
+                <li>Innovative time manipulation mechanics with "Echoes".</li>
+                <li>Challenging puzzle-platforming levels requiring strategic thinking.</li>
+                <li>Intuitive controls for seamless gameplay.</li>
+                <li>Progressive difficulty with new mechanics introduced gradually.</li>
+                <li>Engaging visual style with dynamic particle effects.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="w-full py-6 bg-apple-card mt-8 md:mt-12">
+        <div class="container mx-auto px-4 text-center text-apple-gray text-sm">
+            <p>&copy; 2025 zjtech.dpdns.org. All rights reserved. Chronotron is a trademark of ZJTech.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DOM Elements ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const levelDisplay = document.getElementById('level-display');
+        const echoCountDisplay = document.getElementById('echo-count');
+        const startModal = document.getElementById('start-modal');
+        const levelCompleteModal = document.getElementById('level-complete-modal');
+        const startButton = document.getElementById('start-button');
+        const nextLevelButton = document.getElementById('next-level-button');
+        const levelCompleteTitle = document.getElementById('level-complete-title');
+        const levelCompleteText = document.getElementById('level-complete-text');
+        const hintBox = document.getElementById('hint-box');
+
+        // --- Game Configuration ---
+        const TILE_SIZE = 40;
+        const GRAVITY = 0.5;
+        const PLAYER_SPEED = 4;
+        const JUMP_FORCE = -12;
+        const MAX_ECHOES = 5;
+
+        let game;
+        let hintTimeout;
+
+        // --- Game Levels Data ---
+        // ' ' = Empty, 'X' = Platform, 'P' = Player Start, 'E' = Exit,
+        // 'B' = Button, 'D' = Door, 'K' = Key, 'L' = Locked Door
+        const LEVELS = [
+            {
+                name: "First Leap",
+                hint: "Use Arrow Keys to move and jump. Reach the swirling portal.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P                X",
+                    "X XX               X",
+                    "X      XXX         X",
+                    "X                  X",
+                    "X            XX    X",
+                    "X   XXXX         E X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "The Solitary Button",
+                hint: "You can't press the button and go through the door. Press 'R' to leave an echo to help.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P                X",
+                    "X XX         D     X",
+                    "X            X     X",
+                    "X   B        X   E X",
+                    "X XXXX       XXXXXXX",
+                    "X                  X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "The High Key",
+                hint: "The key is out of reach. An echo can collect it for you.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P  K             X",
+                    "X XXXX       L   E X",
+                    "X            XXXXXXX",
+                    "X                  X",
+                    "X     XXXXXX       X",
+                    "X                  X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "A Ghostly Stepping Stone",
+                hint: "Can't jump high enough? Maybe you can jump on an echo's head.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X                  X",
+                    "X                E X",
+                    "X                XXX",
+                    "X                  X",
+                    "X        XXX       X",
+                    "X P                X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "Dual Concerto",
+                hint: "This door needs two buttons pressed at once. You'll need two echoes.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P                X",
+                    "X XX     D         X",
+                    "X        X         X",
+                    "X   B    X     B   X",
+                    "X XXXX   X   XXXX  X",
+                    "X            E     X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "Leap of Faith",
+                hint: "An echo must create a bridge for you to cross the gap.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P                X",
+                    "X XXXX             X",
+                    "X                  X",
+                    "X                  X",
+                    "X             XXXX X",
+                    "X                  X",
+                    "X       E          X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "Key Relay",
+                hint: "One echo gets the key, another opens the door. Teamwork!",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P K      L     E X",
+                    "XXXXX    XXXXXXXXXXX",
+                    "X                  X",
+                    "X                  X",
+                    "X                  X",
+                    "X                  X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "The Gauntlet",
+                hint: "Timing is everything. You need multiple echoes to press buttons in sequence.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X P  B D B D B D E X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X                  X",
+                    "X                  X",
+                    "X                  X",
+                    "X                  X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "Ascension",
+                hint: "Create a staircase of echoes to reach the top.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X E                X",
+                    "X X                X",
+                    "X X                X",
+                    "X X                X",
+                    "X X                X",
+                    "X P                X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+            {
+                name: "Final Paradox",
+                hint: "Combine all your skills. You'll need echoes for keys, buttons, and platforms.",
+                layout: [
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "XPK B D L        E X",
+                    "XXXXX X XXXXXXXXXXXX",
+                    "X     B D          X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                    "X                  X",
+                    "X                  X",
+                    "XXXXXXXXXXXXXXXXXXXX",
+                ]
+            },
+        ];
+
+        // --- Utility Functions ---
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const { width, height } = container.getBoundingClientRect();
+            canvas.width = width;
+            canvas.height = height;
+            if (game) {
+                game.width = width;
+                game.height = height;
+                // Re-calculate tileSize based on new dimensions, maintaining aspect ratio logic
+                game.tileSize = Math.min(width / 20, height / 8);
+                // Re-initialize level to adapt to new tile size
+                game.loadLevel(game.currentLevelIndex);
+            }
+        }
+
+        // --- Input Handler ---
+        const keys = { left: false, right: false, up: false };
+
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowLeft': case 'a': keys.left = true; break;
+                case 'ArrowRight': case 'd': keys.right = true; break;
+                case 'ArrowUp': case 'w': case ' ': keys.up = true; break;
+                case 'r': case 'R': if (game && game.state === 'playing') game.createEcho(); break;
+                case 't': case 'T': if (game && game.state === 'playing') game.resetLevel(true); break;
+                case 'h': case 'H': if (game && game.state === 'playing') game.showHint(); break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            switch (e.key) {
+                case 'ArrowLeft': case 'a': keys.left = false; break;
+                case 'ArrowRight': case 'd': keys.right = false; break;
+                case 'ArrowUp': case 'w': case ' ': keys.up = false; break;
+            }
+        });
+
+        // --- Game Classes ---
+        class Player {
+            constructor(game, x, y) {
+                this.game = game;
+                this.x = x;
+                this.y = y;
+                this.width = this.game.tileSize * 0.7;
+                this.height = this.game.tileSize * 0.9;
+                this.vx = 0;
+                this.vy = 0;
+                this.onGround = false;
+                this.hasKey = false;
+                this.actionLog = [];
+            }
+
+            update() {
+                this.actionLog.push({ x: this.x, y: this.y, hasKey: this.hasKey });
+
+                this.vx = 0;
+                if (keys.left) this.vx = -PLAYER_SPEED;
+                if (keys.right) this.vx = PLAYER_SPEED;
+
+                if (keys.up && this.onGround) {
+                    this.vy = JUMP_FORCE;
+                    this.onGround = false;
+                }
+
+                this.vy += GRAVITY;
+                this.x += this.vx * (this.game.tileSize / TILE_SIZE);
+                this.y += this.vy * (this.game.tileSize / TILE_SIZE);
+
+                this.onGround = false;
+                this.checkCollisions();
+            }
+
+            checkCollisions() {
+                const checkEntityCollision = (entity) => {
+                    const platforms = this.game.level.platforms.concat(
+                        this.game.echoes.map(e => ({ x: e.x, y: e.y, w: e.width, h: e.height, owner: { isOpen: false } }))
+                    );
+
+                    platforms.forEach(p => {
+                        if (p.isDoorPlatform && p.owner.isOpen) return;
+
+                        if (entity.x < p.x + p.w && entity.x + entity.width > p.x &&
+                            entity.y < p.y + p.h && entity.y + entity.height > p.y) {
+
+                            const overlapX = (entity.x + entity.width / 2) - (p.x + p.w / 2);
+                            const overlapY = (entity.y + entity.height / 2) - (p.y + p.h / 2);
+                            const combinedHalfWidths = (entity.width / 2) + (p.w / 2);
+                            const combinedHalfHeights = (entity.height / 2) + (p.h / 2);
+
+                            if (Math.abs(overlapX) < combinedHalfWidths && Math.abs(overlapY) < combinedHalfHeights) {
+                                const overlapXAmount = combinedHalfWidths - Math.abs(overlapX);
+                                const overlapYAmount = combinedHalfHeights - Math.abs(overlapY);
+
+                                if (overlapXAmount < overlapYAmount) {
+                                    if (overlapX > 0) entity.x = p.x + p.w;
+                                    else entity.x = p.x - entity.width;
+                                    entity.vx = 0;
+                                } else {
+                                    if (overlapY > 0) {
+                                        entity.y = p.y + p.h;
+                                        entity.vy = 0;
+                                    } else {
+                                        entity.y = p.y - entity.height;
+                                        entity.vy = 0;
+                                        entity.onGround = true;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                };
+
+                checkEntityCollision(this);
+                this.game.level.interactables.forEach(i => i.check(this));
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = this.hasKey ? '#FFD700' : '#4cd1ff';
+                ctx.shadowColor = this.hasKey ? '#FFD700' : '#4cd1ff';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Echo {
+            constructor(game, actionLog) {
+                this.game = game;
+                this.actionLog = actionLog;
+                this.frame = 0;
+                this.x = actionLog[0]?.x || 0;
+                this.y = actionLog[0]?.y || 0;
+                this.width = this.game.tileSize * 0.7;
+                this.height = this.game.tileSize * 0.9;
+                this.hasKey = false;
+            }
+
+            update() {
+                if (this.frame < this.actionLog.length) {
+                    const state = this.actionLog[this.frame];
+                    this.x = state.x;
+                    this.y = state.y;
+                    this.hasKey = state.hasKey;
+                    this.frame++;
+                }
+                this.game.level.interactables.forEach(i => i.check(this));
+            }
+
+            draw(ctx) {
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = this.hasKey ? 'rgba(255, 215, 0, 0.7)' : 'rgba(138, 43, 226, 0.7)';
+                ctx.shadowColor = this.hasKey ? 'rgba(255, 215, 0, 0.7)' : 'rgba(138, 43, 226, 0.7)';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Level {
+            constructor(game, levelData) {
+                this.game = game;
+                this.platforms = [];
+                this.interactables = [];
+                this.playerStart = { x: 0, y: 0 };
+                this.parse(levelData);
+            }
+
+            parse(levelData) {
+                const layout = levelData.layout;
+                this.platforms = [];
+                this.interactables = [];
+                const ts = this.game.tileSize;
+                layout.forEach((row, y) => {
+                    for (let x = 0; x < row.length; x++) {
+                        const char = row[x];
+                        const posX = x * ts;
+                        const posY = y * ts;
+                        switch (char) {
+                            case 'X': this.platforms.push({ x: posX, y: posY, w: ts, h: ts }); break;
+                            case 'P': this.playerStart = { x: posX, y: posY }; break;
+                            case 'E': this.interactables.push(new Exit(this.game, posX, posY)); break;
+                            case 'B': this.interactables.push(new Button(this.game, posX, posY)); break;
+                            case 'D':
+                                const door = new Door(this.game, posX, posY);
+                                this.platforms.push(door.platform);
+                                this.interactables.push(door);
+                                break;
+                            case 'K': this.interactables.push(new Key(this.game, posX, posY)); break;
+                            case 'L':
+                                const lockedDoor = new LockedDoor(this.game, posX, posY);
+                                this.platforms.push(lockedDoor.platform);
+                                this.interactables.push(lockedDoor);
+                                break;
+                        }
+                    }
+                });
+            }
+
+            update() {
+                this.interactables.forEach(i => i.update());
+            }
+
+            draw(ctx) {
+                this.platforms.forEach(p => {
+                    if (p.isDoorPlatform && p.owner.isOpen) return;
+                    const grad = ctx.createLinearGradient(p.x, p.y, p.x + p.w, p.y + p.h);
+                    grad.addColorStop(0, '#43436B');
+                    grad.addColorStop(1, '#232545');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                    ctx.strokeStyle = 'rgba(76, 209, 255, 0.3)';
+                    ctx.strokeRect(p.x, p.y, p.w, p.h);
+                });
+                this.interactables.forEach(i => i.draw(ctx));
+            }
+        }
+
+        // --- Interactable Objects ---
+        class Exit {
+            constructor(game, x, y) { this.game = game; this.x = x; this.y = y; this.width = game.tileSize; this.height = game.tileSize; }
+            update() {}
+            check(entity) { if (entity instanceof Player && this.collides(entity)) this.game.levelComplete(); }
+            collides(entity) { return entity.x < this.x + this.width && entity.x + entity.width > this.x && entity.y < this.y + this.height && entity.y + entity.height > this.y; }
+            draw(ctx) {
+                const t = this.game.frameCount * 0.05;
+                const radius = this.width / 2 * (0.8 + Math.sin(t) * 0.1);
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.shadowColor = '#fff'; ctx.shadowBlur = 20;
+                const grad = ctx.createRadialGradient(0, 0, radius * 0.1, 0, 0, radius);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(0.5, 'rgba(76, 209, 255, 0.8)');
+                grad.addColorStop(1, 'rgba(76, 209, 255, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class Button {
+            constructor(game, x, y) { this.game = game; this.x = x; this.y = y + game.tileSize * 0.8; this.width = game.tileSize; this.height = game.tileSize * 0.2; this.isPressed = false; }
+            update() { this.isPressed = false; }
+            check(entity) {
+                if (entity.x < this.x + this.width && entity.x + entity.width > this.x && entity.y + entity.height > this.y && entity.y + entity.height < this.y + this.height + 5) {
+                    this.isPressed = true;
+                }
+            }
+            draw(ctx) { ctx.fillStyle = this.isPressed ? '#4CAF50' : '#F44336'; ctx.fillRect(this.x, this.y, this.width, this.height); }
+        }
+
+        class Door {
+            constructor(game, x, y) { this.game = game; this.isOpen = false; this.platform = { x, y, w: game.tileSize, h: game.tileSize, isDoorPlatform: true, owner: this }; }
+            update() {
+                const buttons = this.game.level.interactables.filter(i => i instanceof Button);
+                const pressedButtons = buttons.filter(b => b.isPressed);
+                this.isOpen = buttons.length > 0 && pressedButtons.length === buttons.length;
+            }
+            check() {}
+            draw(ctx) {
+                if (!this.isOpen) {
+                    const p = this.platform;
+                    const grad = ctx.createLinearGradient(p.x, p.y, p.x + p.w, p.y + p.h);
+                    grad.addColorStop(0, '#8E2DE2'); grad.addColorStop(1, '#4A00E0');
+                    ctx.fillStyle = grad; ctx.fillRect(p.x, p.y, p.w, p.h);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.strokeRect(p.x, p.y, p.w, p.h);
+                }
+            }
+        }
+
+        class Key {
+            constructor(game, x, y) { this.game = game; this.x = x; this.y = y; this.width = game.tileSize * 0.5; this.height = game.tileSize * 0.5; this.isCollected = false; }
+            reset() { this.isCollected = false; }
+            update() {}
+            check(entity) {
+                if (!this.isCollected && this.collides(entity)) {
+                    if (entity instanceof Player || entity instanceof Echo) {
+                        entity.hasKey = true;
+                        this.isCollected = true;
+                    }
+                }
+            }
+            collides(entity) { return entity.x < this.x + this.width && entity.x + entity.width > this.x && entity.y < this.y + this.height && entity.y + entity.height > this.y; }
+            draw(ctx) {
+                if (!this.isCollected) {
+                    ctx.fillStyle = '#FFD700'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 10;
+                    ctx.fillRect(this.x + this.width/4, this.y, this.width/2, this.height);
+                    ctx.beginPath(); ctx.arc(this.x + this.width/2, this.y + this.height/4, this.width/4, 0, Math.PI * 2); ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        class LockedDoor {
+            constructor(game, x, y) { this.game = game; this.isOpen = false; this.platform = { x, y, w: game.tileSize, h: game.tileSize, isDoorPlatform: true, owner: this }; }
+            reset() { this.isOpen = false; }
+            update() {}
+            check(entity) { if (!this.isOpen && entity.hasKey && this.collides(entity)) { this.isOpen = true; entity.hasKey = false; } }
+            collides(entity) { const p = this.platform; return entity.x < p.x + p.w && entity.x + entity.width > p.x && entity.y < p.y + p.h && entity.y + entity.height > p.y; }
+            draw(ctx) {
+                if (!this.isOpen) {
+                    const p = this.platform;
+                    ctx.fillStyle = '#795548'; ctx.fillRect(p.x, p.y, p.w, p.h);
+                    ctx.fillStyle = '#FFC107'; ctx.fillRect(p.x + p.w * 0.4, p.y + p.h * 0.4, p.w * 0.2, p.h * 0.2);
+                }
+            }
+        }
+
+        // --- Main Game Class ---
+        class Game {
+            constructor(width, height) {
+                this.width = width;
+                this.height = height;
+                this.tileSize = Math.min(width / 20, height / 8);
+                this.currentLevelIndex = 0;
+                this.player = null;
+                this.echoes = [];
+                this.level = null;
+                this.state = 'menu'; // menu, playing, complete, finished
+                this.frameCount = 0;
+                this.particles = [];
+                this.loadLevel(this.currentLevelIndex);
+            }
+
+            loadLevel(levelIndex) {
+                this.currentLevelIndex = levelIndex;
+                const levelData = LEVELS[levelIndex];
+                if (!levelData) { this.state = 'finished'; return; }
+                this.level = new Level(this, levelData);
+                this.resetLevel(true);
+                levelDisplay.textContent = `Level ${levelIndex + 1}: ${levelData.name}`;
+            }
+
+            resetLevel(fullReset) {
+                if (fullReset) {
+                    this.echoes = [];
+                    this.level.interactables.forEach(i => { if (i.reset) i.reset(); });
+                }
+                const startPos = this.level.playerStart;
+                this.player = new Player(this, startPos.x, startPos.y);
+                echoCountDisplay.textContent = `Echoes: ${this.echoes.length}`;
+            }
+
+            createEcho() {
+                if (this.echoes.length >= MAX_ECHOES) return;
+                if (this.player.actionLog.length > 0) {
+                    this.echoes.push(new Echo(this, this.player.actionLog));
+                    this.resetLevel(false);
+                }
+            }
+
+            showHint() {
+                if (hintTimeout) clearTimeout(hintTimeout);
+                const hint = LEVELS[this.currentLevelIndex].hint;
+                hintBox.textContent = hint;
+                hintBox.classList.add('visible');
+                hintTimeout = setTimeout(() => {
+                    hintBox.classList.remove('visible');
+                }, 5000); // Hint visible for 5 seconds
+            }
+
+            levelComplete() {
+                this.state = 'complete';
+                levelCompleteModal.classList.remove('hidden');
+                if (this.currentLevelIndex >= LEVELS.length - 1) {
+                    levelCompleteTitle.textContent = "Congratulations!";
+                    levelCompleteText.textContent = "You have mastered the flow of time. Thanks for playing!";
+                    nextLevelButton.textContent = "Play Again";
+                } else {
+                    levelCompleteTitle.textContent = "Level Complete!";
+                    levelCompleteText.textContent = `You cleared "${LEVELS[this.currentLevelIndex].name}". Ready for the next challenge?`;
+                    nextLevelButton.textContent = "Next Level";
+                }
+            }
+
+            nextLevel() {
+                levelCompleteModal.classList.add('hidden');
+                if (this.currentLevelIndex >= LEVELS.length - 1) {
+                    this.currentLevelIndex = 0;
+                } else {
+                    this.currentLevelIndex++;
+                }
+                this.loadLevel(this.currentLevelIndex);
+                this.state = 'playing';
+            }
+
+            update() {
+                if (this.state !== 'playing') return;
+                this.frameCount++;
+                this.level.update();
+                this.player.update();
+                this.echoes.forEach(e => e.update());
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update();
+                    if (this.particles[i].life <= 0) this.particles.splice(i, 1);
+                }
+                if (Math.random() < 0.2) {
+                    this.particles.push(new Particle(Math.random() * this.width, Math.random() * this.height, 'rgba(76, 209, 255, 0.5)'));
+                }
+            }
+
+            draw() {
+                const grad = ctx.createLinearGradient(0, 0, 0, this.height);
+                grad.addColorStop(0, '#1a1a2e'); grad.addColorStop(1, '#0f0c29');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, this.width, this.height);
+                this.particles.forEach(p => p.draw(ctx));
+                this.level.draw(ctx);
+                this.echoes.forEach(e => e.draw(ctx));
+                this.player.draw(ctx);
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) { this.x = x; this.y = y; this.color = color; this.size = Math.random() * 2 + 1; this.life = Math.random() * 50 + 50; this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5; }
+            update() { this.x += this.vx; this.y += this.vy; this.life--; }
+            draw(ctx) { ctx.fillStyle = this.color; ctx.globalAlpha = this.life / 100; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1.0; }
+        }
+
+        // --- Game Loop ---
+        function gameLoop() {
+            if (game) { game.update(); game.draw(); }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- Initialization ---
+        window.addEventListener('resize', resizeCanvas);
+        startButton.addEventListener('click', () => { startModal.classList.add('hidden'); game.state = 'playing'; });
+        nextLevelButton.addEventListener('click', () => { game.nextLevel(); });
+
+        // Initial setup
+        resizeCanvas();
+        game = new Game(canvas.width, canvas.height);
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
