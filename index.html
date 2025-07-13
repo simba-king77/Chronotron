@@ -19,13 +19,13 @@
                     },
                     colors: {
                         // Apple-inspired palette
-                        'apple-dark': '#1C1C1E', // Dark background
-                        'apple-light-gray': '#E5E5EA', // Light text/elements
-                        'apple-blue': '#0A84FF', // Accent blue
-                        'apple-green': '#34C759', // Success green
-                        'apple-red': '#FF3B30', // Error/danger red
-                        'apple-gray': '#8E8E93', // Muted text
-                        'apple-card': '#2C2C2E', // Card background
+                        'apple-dark': '#1C1C1E', // 深色背景
+                        'apple-light-gray': '#E5E5EA', // 浅色文本/元素
+                        'apple-blue': '#0A84FF', // 强调蓝色
+                        'apple-green': '#34C759', // 成功绿色
+                        'apple-red': '#FF3B30', // 错误/危险红色
+                        'apple-gray': '#8E8E93', // 静音文本
+                        'apple-card': '#2C2C2E', // 卡片背景
                     }
                 }
             }
@@ -42,10 +42,10 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Changed to column for header/footer */
-            justify-content: flex-start; /* Align items to start for scrollable content */
+            flex-direction: column;
+            justify-content: flex-start;
             align-items: center;
-            min-height: 100vh; /* Use min-height for scrollable content */
+            min-height: 100vh;
             background: #1a1a2e; /* Fallback for game container background */
             background: linear-gradient(to bottom, #1a1a2e, #0f0c29); /* Dark gradient for body */
             font-family: 'Inter', sans-serif;
@@ -54,8 +54,8 @@
         }
         .game-container {
             position: relative;
-            width: 100%;
-            max-width: 960px;
+            width: 100%; /* Make it take full width on small screens */
+            max-width: 960px; /* Max width for larger screens */
             aspect-ratio: 16 / 9;
             box-shadow: 0 0 30px rgba(76, 209, 255, 0.5);
             border-radius: 15px;
@@ -88,12 +88,17 @@
             justify-content: space-between;
             align-items: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.2rem; /* Adjusted for mobile */
             text-shadow: 0 0 10px #4cd1ff;
+        }
+        @media (min-width: 768px) { /* Medium screens and up */
+            .top-bar {
+                font-size: 1.5rem;
+            }
         }
         #level-display, #echo-count {
             background: rgba(0,0,0,0.3);
-            padding: 5px 15px;
+            padding: 5px 10px; /* Adjusted for mobile */
             border-radius: 8px;
             border: 1px solid rgba(76, 209, 255, 0.5);
         }
@@ -120,28 +125,46 @@
             pointer-events: none;
         }
         .modal-content {
-            max-width: 600px;
-            padding: 40px;
+            max-width: 90%; /* More width on mobile */
+            margin: 20px; /* Add some margin */
+            padding: 20px; /* Adjusted padding for mobile */
             background: rgba(36, 36, 62, 0.8);
             border-radius: 15px;
             border: 1px solid rgba(76, 209, 255, 0.7);
             box-shadow: 0 0 20px rgba(76, 209, 255, 0.3);
         }
+        @media (min-width: 640px) { /* Small screens and up */
+            .modal-content {
+                max-width: 600px; /* Revert to original max-width on larger screens */
+                padding: 40px;
+            }
+        }
         .modal h1 {
             font-family: 'Orbitron', sans-serif;
             color: #4cd1ff;
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 2rem; /* Adjusted for mobile */
+            margin-bottom: 15px;
+        }
+        @media (min-width: 768px) {
+            .modal h1 {
+                font-size: 3rem;
+            }
         }
         .modal p {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            margin-bottom: 30px;
+            font-size: 1rem; /* Adjusted for mobile */
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        @media (min-width: 768px) {
+            .modal p {
+                font-size: 1.2rem;
+                line-height: 1.8;
+            }
         }
         .modal button {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            padding: 15px 40px;
+            font-size: 1.2rem; /* Adjusted for mobile */
+            padding: 10px 25px; /* Adjusted for mobile */
             border: none;
             background: #4cd1ff;
             color: #1a1a2e;
@@ -150,30 +173,47 @@
             transition: all 0.3s ease;
             box-shadow: 0 0 15px #4cd1ff;
         }
+        @media (min-width: 768px) {
+            .modal button {
+                font-size: 1.5rem;
+                padding: 15px 40px;
+            }
+        }
         .modal button:hover {
             background: #fff;
             box-shadow: 0 0 25px #fff;
         }
         .controls-info {
             position: absolute;
-            bottom: 20px;
+            bottom: 10px; /* Adjusted for mobile */
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.3);
-            padding: 10px 20px;
+            padding: 8px 15px; /* Adjusted for mobile */
             border-radius: 8px;
             border: 1px solid rgba(76, 209, 255, 0.5);
-            font-size: 1rem;
+            font-size: 0.8rem; /* Adjusted for mobile */
+            width: calc(100% - 40px); /* Take more width */
+            box-sizing: border-box;
+            text-align: center;
+        }
+        @media (min-width: 768px) {
+            .controls-info {
+                bottom: 20px;
+                padding: 10px 20px;
+                font-size: 1rem;
+                width: auto; /* Revert to auto width on larger screens */
+            }
         }
         #hint-box {
             position: absolute;
-            top: 20px;
+            top: 10px; /* Adjusted for mobile */
             left: 50%;
             transform: translateX(-50%);
             background: rgba(76, 209, 255, 0.9);
             color: #1a1a2e;
             font-family: 'Orbitron', sans-serif;
-            padding: 15px 25px;
+            padding: 10px 15px; /* Adjusted for mobile */
             border-radius: 10px;
             box-shadow: 0 0 15px #4cd1ff;
             z-index: 101;
@@ -181,44 +221,52 @@
             visibility: hidden;
             transition: opacity 0.5s, visibility 0.5s;
             pointer-events: none;
+            font-size: 0.9rem; /* Adjusted for mobile */
+            max-width: 90%; /* Ensure it fits on smaller screens */
+            box-sizing: border-box;
+            text-align: center;
         }
-        #hint-box.visible {
-            opacity: 1;
-            visibility: visible;
+        @media (min-width: 768px) {
+            #hint-box {
+                top: 20px;
+                padding: 15px 25px;
+                font-size: 1rem;
+                max-width: none;
+            }
         }
     </style>
 </head>
 <body class="bg-apple-dark text-apple-light-gray font-sans">
-    <header class="w-full py-6 bg-apple-card shadow-lg mb-8 md:mb-12">
+    <header class="w-full py-4 sm:py-6 bg-apple-card shadow-lg mb-4 sm:mb-8 md:mb-12">
         <div class="container mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-apple-blue tracking-tight font-orbitron mb-2">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-apple-blue tracking-tight font-orbitron mb-1 sm:mb-2">
                 Chronotron: The Time Jumper
             </h1>
-            <p class="text-lg md:text-xl text-apple-gray">
+            <p class="text-base sm:text-lg md:text-xl text-apple-gray">
                 Dive into Chronotron, an innovative puzzle-platformer that challenges your perception of time and space.
             </p>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 flex flex-col items-center max-w-4xl">
-        <section class="mb-12 w-full">
-            <h2 class="text-3xl md:text-4xl font-bold text-apple-light-gray mb-6 text-center">
+    <main class="container mx-auto px-4 py-4 sm:py-8 flex flex-col items-center max-w-full lg:max-w-4xl">
+        <section class="mb-8 sm:mb-12 w-full">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-apple-light-gray mb-4 sm:mb-6 text-center">
                 About the Game
             </h2>
-            <p class="text-lg leading-relaxed text-apple-gray mb-4">
+            <p class="text-base sm:text-lg leading-relaxed text-apple-gray mb-3 sm:mb-4">
                 Chronotron is a unique puzzle-platformer where players wield the power to manipulate time. By pressing 'R', you can rewind your actions, leaving behind an "Echo" of your past self. These echoes will faithfully repeat your recorded movements, allowing you to cooperate with them to press distant buttons, collect unreachable keys, or create temporary platforms.
             </p>
-            <p class="text-lg leading-relaxed text-apple-gray">
+            <p class="text-base sm:text-lg leading-relaxed text-apple-gray">
                 The goal is to strategically utilize these temporal duplicates to overcome obstacles, open doors, and ultimately reach the exit portal in each challenging level. With intuitive controls and increasingly complex puzzles, Chronotron offers a fresh take on the platforming genre, demanding both quick reflexes and clever planning.
             </p>
         </section>
 
-        <section class="mb-12 w-full">
-            <h2 class="text-3xl md:text-4xl font-bold text-apple-light-gray mb-6 text-center">
+        <section class="mb-8 sm:mb-12 w-full">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-apple-light-gray mb-4 sm:mb-6 text-center">
                 Play Chronotron
             </h2>
             <!-- Game Container from original Chronotron.html -->
-            <div class="game-container mx-auto">
+            <div class="game-container mx-auto p-2 sm:p-0"> <!-- Added padding for smaller screens -->
                 <canvas id="gameCanvas"></canvas>
                 <div id="hint-box"></div>
                 <div class="ui-overlay">
@@ -247,11 +295,11 @@
             </div>
         </section>
 
-        <section class="mb-12 w-full">
-            <h2 class="text-3xl md:text-4xl font-bold text-apple-light-gray mb-6 text-center">
+        <section class="mb-8 sm:mb-12 w-full">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-apple-light-gray mb-4 sm:mb-6 text-center">
                 Game Features
             </h2>
-            <ul class="list-disc list-inside text-lg text-apple-gray space-y-2">
+            <ul class="list-disc list-inside text-base sm:text-lg text-apple-gray space-y-2">
                 <li>Innovative time manipulation mechanics with "Echoes".</li>
                 <li>Challenging puzzle-platforming levels requiring strategic thinking.</li>
                 <li>Intuitive controls for seamless gameplay.</li>
@@ -261,8 +309,8 @@
         </section>
     </main>
 
-    <footer class="w-full py-6 bg-apple-card mt-8 md:mt-12">
-        <div class="container mx-auto px-4 text-center text-apple-gray text-sm">
+    <footer class="w-full py-4 sm:py-6 bg-apple-card mt-4 sm:mt-8 md:mt-12">
+        <div class="container mx-auto px-4 text-center text-apple-gray text-xs sm:text-sm">
             <p>&copy; 2025 zjtech.dpdns.org. All rights reserved. Chronotron is a trademark of ZJTech.</p>
         </div>
     </footer>
@@ -442,14 +490,18 @@
         function resizeCanvas() {
             const container = canvas.parentElement;
             const { width, height } = container.getBoundingClientRect();
-            canvas.width = width;
-            canvas.height = height;
+
+            // Ensure canvas dimensions are integers to prevent rendering issues
+            canvas.width = Math.floor(width);
+            canvas.height = Math.floor(height);
+
             if (game) {
-                game.width = width;
-                game.height = height;
+                game.width = canvas.width;
+                game.height = canvas.height;
                 // Re-calculate tileSize based on new dimensions, maintaining aspect ratio logic
-                game.tileSize = Math.min(width / 20, height / 8);
-                // Re-initialize level to adapt to new tile size
+                // Ensure tileSize is also an integer to prevent fractional pixel rendering
+                game.tileSize = Math.floor(Math.min(game.width / 20, game.height / 8));
+                // Re-initialize level to adapt to new tile size and redraw
                 game.loadLevel(game.currentLevelIndex);
             }
         }
